@@ -1,11 +1,14 @@
 
 require("dotenv").config();
-
+//this is the code to use key.js file in this file
 var keys = require('./keys.js');
 var Spotify = require('node-spotify-api');
 var axios = require("axios");
+//userInput variable is what I use for my searches
 var userInput = process.argv.slice(3).join("+");
+//command allows me to record what command the user inputs to Liri. the slice(2, 3) isolates the infomation I need
 var command = process.argv.slice(2, 3);
+//the next 2 lines are code to pull a usable search term from what the user inputs specifically for the Spotify NPM
 var x = process.argv.slice(3).join(" ");
 var songInput = "'" + x + "'";
 var fs = require("fs");
@@ -13,15 +16,16 @@ var fs = require("fs");
 
 var spotify = new Spotify(keys.spotify);
 
-// console.log(songInput);
+//This is to update the log.txt file showing every command entered
 function appendCommand() {
-    fs.appendFile("log.txt", command, function (err) {
+    fs.appendFile("log.txt", " " + command + ",", function (err) {
         if (err) {
             return console.log(err);
         }
     });
 }
 
+//concertThis function gets concert information from userInput
 function concertThis() {
     var queryUrl = "https://rest.bandsintown.com/artists/" + userInput + "/events?app_id=codingbootcamp"
     axios.get(queryUrl).then(function (response) {
@@ -29,7 +33,7 @@ function concertThis() {
         console.log("Welcome to Liri Bot v 1.0")
         console.log("Concert Finder")
         console.log("***********************************");
-
+        //showing the first 5 results to keep the page managable
         for (let i = 0; i < 5; i++) {
             console.log("----------------------------------");
             console.log(`Artist: ${response.data[i].lineup}\nVenue: ${response.data[i].venue.name}\nLocation: ${response.data[i].venue.city}, ${response.data[i].venue.region}\nDate/Time: ${response.data[i].datetime}`);
@@ -40,6 +44,7 @@ function concertThis() {
 }
 
 function spotifyThisSong() {
+    //this is for when there is no userInput/songInput
     if (userInput == '') {
         spotify.search({ type: 'track', query: 'The Sign' })
             .then(function (results) {
@@ -47,13 +52,14 @@ function spotifyThisSong() {
                 console.log("Welcome to Liri Bot v 1.0")
                 console.log("Song Finder")
                 console.log("***********************************");
+                //showing the first 5 results to keep the page managable
                 for (let i = 0; i < 5; i++) {
                     console.log("----------------------------------");
                     console.log(`Band: ${results.tracks.items[i].artists[0].name}\nSong: ${results.tracks.items[i].name}\nPreview URL: ${results.tracks.items[i].preview_url}\nAlbum: ${results.tracks.items[0].album.name}`)
                     console.log("----------------------------------");
                 }
             });
-
+    //this is a search based on user input
     } else {
 
         spotify.search({ type: 'track', query: songInput })
@@ -62,6 +68,7 @@ function spotifyThisSong() {
                 console.log("Welcome to Liri Bot v 1.0")
                 console.log("Song Finder")
                 console.log("***********************************");
+                //showing the first 5 results to keep the page managable
                 for (let i = 0; i < 5; i++) {
                     console.log("----------------------------------");
                     console.log(`Band: ${results.tracks.items[i].artists[0].name}\nSong: ${results.tracks.items[i].name}\nPreview URL: ${results.tracks.items[i].preview_url}\nAlbum: ${results.tracks.items[0].album.name}`)
@@ -72,10 +79,13 @@ function spotifyThisSong() {
     appendCommand();
 }
 
+//get movie information for userInput
 function movieThis() {
     var queryUrl = "";
     if (userInput == "") {
+        //this is for when no 'userInput' is entered
         queryUrl = "http://www.omdbapi.com/?t=mr+nobody&y=&plot=short&apikey=trilogy"
+        //this is a search based on userInput
     } else {
         queryUrl = "http://www.omdbapi.com/?t=" + userInput + "&y=&plot=short&apikey=trilogy"
     }
@@ -95,7 +105,6 @@ function movieThis() {
 }
 
 function doIt() {
-    var fs = require("fs");
     fs.readFile("random.txt", "utf8", function (error, data) {
         if (error) {
             return console.log(error);
@@ -106,7 +115,8 @@ function doIt() {
                 console.log("Welcome to Liri Bot v 1.0")
                 console.log("Do What It Says")
                 console.log("***********************************");
-                for (let i = 0; i < 1; i++) {
+                //showing 5 results to keep screen managable
+                for (let i = 0; i < 5; i++) {
                     console.log("----------------------------------");
                     console.log(`Band: ${results.tracks.items[i].artists[0].name}\nSong: ${results.tracks.items[i].name}\nPreview URL: ${results.tracks.items[i].preview_url}\nAlbum: ${results.tracks.items[0].album.name}`)
                     console.log("----------------------------------");
@@ -128,7 +138,10 @@ if (command == "concert-this") {
 } else if (command == 'do-what-it-says') {
     doIt();
 } else {
-    console.log("input not recognized")
+    //this is if the command is invalid
+    console.log("----------------------------------");
+    console.log("Command Not Recognized");
+    console.log("----------------------------------");
 }
 
 
